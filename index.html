@@ -311,79 +311,84 @@
         </div>
 
         <style>
-    /* STYLES FOR CHVRTK HR MACHINE */
     .hr-wrapper {
-        font-family: 'Inter', sans-serif;
-        max-width: 600px;
+        font-family: 'Inter', -apple-system, system-ui, sans-serif;
+        max-width: 550px;
         margin: 40px auto;
         background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        padding: 30px;
-        color: #333;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        padding: 40px;
+        color: #1a1a1a;
+        border: 1px solid #f0f0f0;
     }
+    
     .hr-step { display: none; }
-    .hr-step.active { display: block; animation: hrFadeIn 0.4s ease; }
-    @keyframes hrFadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+    .hr-step.active { display: block; animation: hrSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
     
-    .hr-header { margin-bottom: 20px; }
-    .hr-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-    .hr-subtitle { font-size: 14px; color: #666; line-height: 1.4; }
+    @keyframes hrSlideUp { 
+        from { opacity: 0; transform: translateY(20px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
     
-    /* Progress Bar */
-    .hr-progress-container { height: 6px; background: #F0F0F0; border-radius: 3px; margin-bottom: 25px; overflow: hidden; }
-    .hr-progress-fill { height: 100%; background: #222; width: 0%; transition: width 0.3s ease; }
+    .hr-header { margin-bottom: 30px; text-align: left; }
+    .hr-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
+    .hr-subtitle { font-size: 15px; color: #666; line-height: 1.5; }
     
-    /* Options */
+    .hr-progress-container { height: 4px; background: #f0f0f0; border-radius: 10px; margin-bottom: 35px; }
+    .hr-progress-fill { height: 100%; background: #000; width: 0%; transition: width 0.4s ease; border-radius: 10px; }
+    
     .hr-opt {
-        padding: 16px;
-        border: 2px solid #E5E5E5;
-        border-radius: 12px;
+        padding: 18px 20px;
+        border: 2px solid #f0f0f0;
+        border-radius: 16px;
         margin-bottom: 12px;
         cursor: pointer;
-        transition: all 0.2s;
-        font-size: 15px;
+        transition: all 0.2s ease;
+        font-size: 16px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
     }
-    .hr-opt:hover { border-color: #999; background: #fafafa; }
-    .hr-opt.selected { border-color: #000; background: #F5F5F5; font-weight: 500; }
+    .hr-opt:hover { border-color: #ddd; background: #f9f9f9; }
+    .hr-opt.selected { border-color: #000; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .hr-opt.selected::before { content: "●"; margin-right: 12px; font-size: 12px; }
     
-    /* Inputs */
     .hr-input {
         width: 100%;
-        padding: 14px;
-        border: 2px solid #E5E5E5;
-        border-radius: 10px;
-        font-size: 15px;
-        margin-bottom: 12px;
+        padding: 16px;
+        border: 2px solid #f0f0f0;
+        border-radius: 14px;
+        font-size: 16px;
+        margin-bottom: 15px;
         box-sizing: border-box;
         font-family: inherit;
+        transition: border-color 0.2s;
     }
     .hr-input:focus { outline: none; border-color: #000; }
-    textarea.hr-input { height: 120px; resize: none; }
+    textarea.hr-input { height: 140px; resize: none; line-height: 1.6; }
     
-    /* Buttons */
     .hr-btn {
         width: 100%;
-        padding: 16px;
+        padding: 18px;
         background: #000;
         color: #fff;
         border: none;
-        border-radius: 12px;
+        border-radius: 16px;
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
+        transition: transform 0.2s, opacity 0.2s;
         margin-top: 10px;
-        transition: opacity 0.2s;
     }
-    .hr-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .hr-btn:hover:not(:disabled) { opacity: 0.9; }
-
-    /* Results */
+    .hr-btn:active { transform: scale(0.98); }
+    .hr-btn:disabled { background: #ccc; cursor: not-allowed; }
+    
     .hr-result-box { text-align: center; padding: 20px 0; }
     .hr-score-circle { 
-        width: 120px; height: 120px; background: #000; color: #fff; border-radius: 50%; 
+        width: 100px; height: 100px; background: #000; color: #fff; border-radius: 50%; 
         display: flex; align-items: center; justify-content: center; 
-        font-size: 48px; font-weight: 800; margin: 0 auto 20px auto; 
+        font-size: 32px; font-weight: 800; margin: 0 auto 25px auto; 
     }
 </style>
 
@@ -392,43 +397,44 @@
 
     <div class="hr-step active" id="step-0">
         <div class="hr-header">
-            <div class="hr-title">Карьера в CHVRTK.RU</div>
-            <div class="hr-subtitle">Пройдите быстрый скрининг (10 вопросов + кейс).<br>Система автоматически определит ваш уровень.</div>
+            <div class="hr-title">Career at CHVRTK.RU</div>
+            <div class="hr-subtitle">Пройдите быстрый скрининг навыков (10 вопросов + кейс). Мы определим ваш уровень английского и соответствие роли.</div>
         </div>
         <button class="hr-btn" onclick="HRMachine.next()">Начать тест</button>
     </div>
 
     <div id="hr-questions-render"></div>
 
-    <div class="hr-step" id="step-case">
+    <div class="hr-step" id="step-11">
         <div class="hr-header">
-            <div class="hr-title">Финальный кейс</div>
-            <div class="hr-subtitle">"We need someone who can take ownership of this process."<br>Напишите, как вы понимаете это требование и приведите пример из опыта (на английском).</div>
+            <div class="hr-title">Fianl Case Study</div>
+            <div class="hr-subtitle">"We need someone who can take ownership of this process."<br>How do you understand this? Give an example from your experience.</div>
         </div>
-        <textarea class="hr-input" id="hr-case-text" placeholder="I understand this as..."></textarea>
+        <textarea class="hr-input" id="hr-case-text" placeholder="Your answer in English..."></textarea>
         <button class="hr-btn" onclick="HRMachine.next()">Готово</button>
     </div>
 
-    <div class="hr-step" id="step-form">
+    <div class="hr-step" id="step-12">
         <div class="hr-header">
-            <div class="hr-title">Куда отправить результат?</div>
+            <div class="hr-title">Contact Information</div>
+            <div class="hr-subtitle">Оставьте контакты, чтобы HR мог связаться с вами после проверки теста.</div>
         </div>
-        <input type="text" class="hr-input" id="hr-name" placeholder="Ваше Имя и Фамилия">
-        <input type="text" class="hr-input" id="hr-tg" placeholder="@telegram_username">
+        <input type="text" class="hr-input" id="hr-name" placeholder="Name and Surname">
+        <input type="text" class="hr-input" id="hr-tg" placeholder="@telegram_nick">
         
-        <label style="display:flex; align-items:center; gap:10px; font-size:13px; color:#555; margin:15px 0;">
-            <input type="checkbox" id="hr-agree">
-            Я согласен на обработку персональных данных
+        <label style="display:flex; align-items:center; gap:12px; font-size:13px; color:#777; margin:15px 0; cursor:pointer;">
+            <input type="checkbox" id="hr-agree" style="width:18px; height:18px;">
+            I agree to the processing of personal data
         </label>
         
-        <button class="hr-btn" id="hr-submit-btn" onclick="HRMachine.submit()">Отправить</button>
+        <button class="hr-btn" id="hr-submit-btn" onclick="HRMachine.submit()">Отправить результаты</button>
     </div>
 
-    <div class="hr-step" id="step-result">
+    <div class="hr-step" id="step-13">
         <div class="hr-result-box">
-            <div class="hr-title">Ваш уровень</div>
+            <div class="hr-title">Ваш результат</div>
             <div class="hr-score-circle" id="hr-final-lvl">-</div>
-            <div class="hr-subtitle">Спасибо! Мы сохранили результаты.<br>HR свяжется с вами в Telegram в течение 24 часов.</div>
+            <div class="hr-subtitle">Тест успешно отправлен!<br>Мы свяжемся с вами в Telegram в течение суток.</div>
         </div>
     </div>
 </div>
@@ -450,21 +456,22 @@ const HR_DATA = [
 const HRMachine = {
     step: 0,
     answers: {},
-    totalSteps: HR_DATA.length + 3, // Intro, Case, Form
+    totalSteps: 13,
 
     init: function() {
         const container = document.getElementById('hr-questions-render');
+        container.innerHTML = '';
         HR_DATA.forEach((item, idx) => {
             const html = `
             <div class="hr-step" id="step-${idx + 1}">
                 <div class="hr-header">
-                    <div class="hr-title">Вопрос ${idx + 1} / 10</div>
+                    <div class="hr-title">Question ${idx + 1} / 10</div>
                     <div class="hr-subtitle">${item.q}</div>
                 </div>
                 ${item.opts.map((opt, i) => `
                     <div class="hr-opt" onclick="HRMachine.pick('${item.id}', '${item.vals[i]}', this)">${opt}</div>
                 `).join('')}
-                <button class="hr-btn" disabled onclick="HRMachine.next()">Далее</button>
+                <button class="hr-btn" disabled onclick="HRMachine.next()">Next</button>
             </div>`;
             container.innerHTML += html;
         });
@@ -472,7 +479,6 @@ const HRMachine = {
 
     pick: function(qId, val, el) {
         this.answers[qId] = val;
-        // Visuals
         const parent = el.parentElement;
         parent.querySelectorAll('.hr-opt').forEach(d => d.classList.remove('selected'));
         el.classList.add('selected');
@@ -480,15 +486,11 @@ const HRMachine = {
     },
 
     next: function() {
-        document.getElementById(`step-${this.step}`).classList.remove('active');
+        const currentEl = document.getElementById(`step-${this.step}`);
+        if(currentEl) currentEl.classList.remove('active');
         this.step++;
-        
-        // Skip logic if needed, but here simple linear
-        const nextEl = document.getElementById(`step-${this.step}`) || document.getElementById('step-case');
-        if(this.step === 11) document.getElementById('step-case').classList.add('active');
-        else if(this.step === 12) document.getElementById('step-form').classList.add('active');
-        else document.getElementById(`step-${this.step}`).classList.add('active');
-
+        const nextEl = document.getElementById(`step-${this.step}`);
+        if(nextEl) nextEl.classList.add('active');
         this.updateProgress();
     },
 
@@ -498,44 +500,36 @@ const HRMachine = {
     },
 
     submit: async function() {
-        const name = document.getElementById('hr-name').value;
-        const tg = document.getElementById('hr-tg').value;
+        const name = document.getElementById('hr-name').value.trim();
+        const tg = document.getElementById('hr-tg').value.trim();
         const agreed = document.getElementById('hr-agree').checked;
-        const caseText = document.getElementById('hr-case-text').value;
+        const caseText = document.getElementById('hr-case-text').value.trim();
         const btn = document.getElementById('hr-submit-btn');
 
         if(!name || !tg || !agreed) {
-            alert('Заполните Имя, Telegram и галочку согласия!');
+            alert('Please fill in all fields and agree to the terms.');
             return;
         }
 
         btn.disabled = true;
-        btn.innerText = "Оцениваем...";
-
-        const payload = {
-            name: name,
-            telegram: tg,
-            case_study: caseText,
-            answers: this.answers
-        };
+        btn.innerText = "Processing...";
 
         try {
-            // URL вашего API Gateway
             const res = await fetch('https://d5d34ggl6saovpdajhps.a6hc9vya.apigw.yandexcloud.net/submit-candidate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ name, telegram: tg, case_study: caseText, answers: this.answers })
             });
             const data = await res.json();
-
-            document.getElementById('step-form').classList.remove('active');
-            document.getElementById('step-result').classList.add('active');
-            document.getElementById('hr-final-lvl').innerText = data.level;
-            
+            document.getElementById('step-12').classList.remove('active');
+            document.getElementById('step-13').classList.add('active');
+            document.getElementById('hr-final-lvl').innerText = data.level || "B2";
+            this.step = 13;
+            this.updateProgress();
         } catch (e) {
-            alert('Ошибка сети. Попробуйте еще раз.');
+            alert('Error sending data. Please check your connection.');
             btn.disabled = false;
-            btn.innerText = "Отправить";
+            btn.innerText = "Submit";
         }
     }
 };
@@ -562,7 +556,7 @@ document.addEventListener('DOMContentLoaded', HRMachine.init);
             <p>Мы используем AI, Notion, Slack, Figma и автоматизацию — без Excel и хаоса.</p>
             </div>
         </div>
-
+        
 
         <footer>
             <a href="https://chvrtk.ru">← Вернуться на главную</a><br>
