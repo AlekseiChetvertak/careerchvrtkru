@@ -310,6 +310,239 @@
             </div>
         </div>
 
+        <style>
+    /* STYLES FOR CHVRTK HR MACHINE */
+    .hr-wrapper {
+        font-family: 'Inter', sans-serif;
+        max-width: 600px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 30px;
+        color: #333;
+    }
+    .hr-step { display: none; }
+    .hr-step.active { display: block; animation: hrFadeIn 0.4s ease; }
+    @keyframes hrFadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+    
+    .hr-header { margin-bottom: 20px; }
+    .hr-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .hr-subtitle { font-size: 14px; color: #666; line-height: 1.4; }
+    
+    /* Progress Bar */
+    .hr-progress-container { height: 6px; background: #F0F0F0; border-radius: 3px; margin-bottom: 25px; overflow: hidden; }
+    .hr-progress-fill { height: 100%; background: #222; width: 0%; transition: width 0.3s ease; }
+    
+    /* Options */
+    .hr-opt {
+        padding: 16px;
+        border: 2px solid #E5E5E5;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 15px;
+    }
+    .hr-opt:hover { border-color: #999; background: #fafafa; }
+    .hr-opt.selected { border-color: #000; background: #F5F5F5; font-weight: 500; }
+    
+    /* Inputs */
+    .hr-input {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #E5E5E5;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-bottom: 12px;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+    .hr-input:focus { outline: none; border-color: #000; }
+    textarea.hr-input { height: 120px; resize: none; }
+    
+    /* Buttons */
+    .hr-btn {
+        width: 100%;
+        padding: 16px;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: opacity 0.2s;
+    }
+    .hr-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .hr-btn:hover:not(:disabled) { opacity: 0.9; }
+
+    /* Results */
+    .hr-result-box { text-align: center; padding: 20px 0; }
+    .hr-score-circle { 
+        width: 120px; height: 120px; background: #000; color: #fff; border-radius: 50%; 
+        display: flex; align-items: center; justify-content: center; 
+        font-size: 48px; font-weight: 800; margin: 0 auto 20px auto; 
+    }
+</style>
+
+<div class="hr-wrapper" id="hr-app">
+    <div class="hr-progress-container"><div class="hr-progress-fill" id="hr-prog"></div></div>
+
+    <div class="hr-step active" id="step-0">
+        <div class="hr-header">
+            <div class="hr-title">Карьера в CHVRTK.RU</div>
+            <div class="hr-subtitle">Пройдите быстрый скрининг (10 вопросов + кейс).<br>Система автоматически определит ваш уровень.</div>
+        </div>
+        <button class="hr-btn" onclick="HRMachine.next()">Начать тест</button>
+    </div>
+
+    <div id="hr-questions-render"></div>
+
+    <div class="hr-step" id="step-case">
+        <div class="hr-header">
+            <div class="hr-title">Финальный кейс</div>
+            <div class="hr-subtitle">"We need someone who can take ownership of this process."<br>Напишите, как вы понимаете это требование и приведите пример из опыта (на английском).</div>
+        </div>
+        <textarea class="hr-input" id="hr-case-text" placeholder="I understand this as..."></textarea>
+        <button class="hr-btn" onclick="HRMachine.next()">Готово</button>
+    </div>
+
+    <div class="hr-step" id="step-form">
+        <div class="hr-header">
+            <div class="hr-title">Куда отправить результат?</div>
+        </div>
+        <input type="text" class="hr-input" id="hr-name" placeholder="Ваше Имя и Фамилия">
+        <input type="text" class="hr-input" id="hr-tg" placeholder="@telegram_username">
+        
+        <label style="display:flex; align-items:center; gap:10px; font-size:13px; color:#555; margin:15px 0;">
+            <input type="checkbox" id="hr-agree">
+            Я согласен на обработку персональных данных
+        </label>
+        
+        <button class="hr-btn" id="hr-submit-btn" onclick="HRMachine.submit()">Отправить</button>
+    </div>
+
+    <div class="hr-step" id="step-result">
+        <div class="hr-result-box">
+            <div class="hr-title">Ваш уровень</div>
+            <div class="hr-score-circle" id="hr-final-lvl">-</div>
+            <div class="hr-subtitle">Спасибо! Мы сохранили результаты.<br>HR свяжется с вами в Telegram в течение 24 часов.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+const HR_DATA = [
+    { id: "1", q: "If I ___ more time, I would join the project.", opts: ["have", "had", "will have", "would have"], vals: ["a","b","c","d"] },
+    { id: "2", q: "She has been working here ___ 2021.", opts: ["since", "for", "from", "during"], vals: ["a","b","c","d"] },
+    { id: "3", q: "Choose the correct sentence:", opts: ["He suggested me to try", "He suggested that I try", "He suggested I to try", "He suggested me trying"], vals: ["a","b","c","d"] },
+    { id: "4", q: "What does “I’m swamped with work” mean?", opts: ["I’m bored", "I have too much work", "I finished everything", "I work in IT"], vals: ["a","b","c","d"] },
+    { id: "5", q: "Which sentence sounds the most natural?", opts: ["I very like this approach", "I like very much this approach", "I really like this approach", "I like this approach very"], vals: ["a","b","c","d"] },
+    { id: "6", q: "“Let’s touch base tomorrow” means:", opts: ["Meet physically", "Call briefly to update", "Argue about details", "Write documentation"], vals: ["a","b","c","d"] },
+    { id: "7", q: "The idea is interesting, ___ it’s risky.", opts: ["although", "however", "because", "therefore"], vals: ["a","b","c","d"] },
+    { id: "8", q: "Choose the sentence that sounds most professional:", opts: ["This task is very hard", "This task is complicated", "This task is quite challenging", "This task is difficultly"], vals: ["a","b","c","d"] },
+    { id: "9", q: "Difference between “effective” and “efficient”?", opts: ["No difference", "Effective = fast, efficient = cheap", "Effective = result, efficient = min resources", "Efficient is informal"], vals: ["a","b","c","d"] },
+    { id: "10", q: "What does “take ownership” imply?", opts: ["Legal responsibility", "Being blamed", "Full responsibility and initiative", "Management position"], vals: ["a","b","c","d"] }
+];
+
+const HRMachine = {
+    step: 0,
+    answers: {},
+    totalSteps: HR_DATA.length + 3, // Intro, Case, Form
+
+    init: function() {
+        const container = document.getElementById('hr-questions-render');
+        HR_DATA.forEach((item, idx) => {
+            const html = `
+            <div class="hr-step" id="step-${idx + 1}">
+                <div class="hr-header">
+                    <div class="hr-title">Вопрос ${idx + 1} / 10</div>
+                    <div class="hr-subtitle">${item.q}</div>
+                </div>
+                ${item.opts.map((opt, i) => `
+                    <div class="hr-opt" onclick="HRMachine.pick('${item.id}', '${item.vals[i]}', this)">${opt}</div>
+                `).join('')}
+                <button class="hr-btn" disabled onclick="HRMachine.next()">Далее</button>
+            </div>`;
+            container.innerHTML += html;
+        });
+    },
+
+    pick: function(qId, val, el) {
+        this.answers[qId] = val;
+        // Visuals
+        const parent = el.parentElement;
+        parent.querySelectorAll('.hr-opt').forEach(d => d.classList.remove('selected'));
+        el.classList.add('selected');
+        parent.querySelector('button').disabled = false;
+    },
+
+    next: function() {
+        document.getElementById(`step-${this.step}`).classList.remove('active');
+        this.step++;
+        
+        // Skip logic if needed, but here simple linear
+        const nextEl = document.getElementById(`step-${this.step}`) || document.getElementById('step-case');
+        if(this.step === 11) document.getElementById('step-case').classList.add('active');
+        else if(this.step === 12) document.getElementById('step-form').classList.add('active');
+        else document.getElementById(`step-${this.step}`).classList.add('active');
+
+        this.updateProgress();
+    },
+
+    updateProgress: function() {
+        const pct = (this.step / this.totalSteps) * 100;
+        document.getElementById('hr-prog').style.width = pct + '%';
+    },
+
+    submit: async function() {
+        const name = document.getElementById('hr-name').value;
+        const tg = document.getElementById('hr-tg').value;
+        const agreed = document.getElementById('hr-agree').checked;
+        const caseText = document.getElementById('hr-case-text').value;
+        const btn = document.getElementById('hr-submit-btn');
+
+        if(!name || !tg || !agreed) {
+            alert('Заполните Имя, Telegram и галочку согласия!');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Оцениваем...";
+
+        const payload = {
+            name: name,
+            telegram: tg,
+            case_study: caseText,
+            answers: this.answers
+        };
+
+        try {
+            // URL вашего API Gateway
+            const res = await fetch('https://d5d34ggl6saovpdajhps.a6hc9vya.apigw.yandexcloud.net/submit-candidate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            document.getElementById('step-form').classList.remove('active');
+            document.getElementById('step-result').classList.add('active');
+            document.getElementById('hr-final-lvl').innerText = data.level;
+            
+        } catch (e) {
+            alert('Ошибка сети. Попробуйте еще раз.');
+            btn.disabled = false;
+            btn.innerText = "Отправить";
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', HRMachine.init);
+</script>
+
         <h2 style="margin-top:80px; margin-bottom:30px;">Почему стоит работать с нами</h2>
         <div class="benefits">
             <div class="benefit-card">
@@ -329,6 +562,7 @@
             <p>Мы используем AI, Notion, Slack, Figma и автоматизацию — без Excel и хаоса.</p>
             </div>
         </div>
+
 
         <footer>
             <a href="https://chvrtk.ru">← Вернуться на главную</a><br>
